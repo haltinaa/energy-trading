@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Trading Platform</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gray-100">
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800">Energy Trading Platform</h1>
+                <div id="userSection" class="hidden flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm text-gray-600">Welcome,</p>
+                        <p id="userName" class="font-medium"></p>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <p id="walletAddress" class="text-sm text-gray-600"></p>
+                        <p id="userType" class="text-sm font-medium"></p>
+                    </div>
+                    <button id="logoutButton"
+                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition duration-200">
+                        Disconnect Wallet
+                    </button>
+                </div>
+                <button id="connectWallet"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition duration-200">
+                    Connect MetaMask
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8">
+
+
+        <!-- Registration Section -->
+        <div id="registrationSection" class="bg-white p-6 rounded-lg shadow-md mb-6" style="display: none;">
+            <h2 class="text-2xl font-semibold mb-4">Register as User</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 mb-2">Your Name</label>
+                    <input type="text" id="registerName" placeholder="Enter your name"
+                        class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">User Type</label>
+                    <select id="registerUserType"
+                        class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="provider">Energy Provider</option>
+                        <option value="consumer">Energy Consumer</option>
+                    </select>
+                </div>
+                <button id="registerUser"
+                    class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition duration-200">
+                    Register
+                </button>
+            </div>
+        </div>
+
+        <!-- Provider Section -->
+        <div id="providerSection" class="bg-white p-6 rounded-lg shadow-md mb-6" style="display: none;">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Левая колонка - создание листинга -->
+                <div class="space-y-4">
+                    <h2 class="text-2xl font-semibold mb-4">Create Energy Listing</h2>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Energy Amount (kWh)</label>
+                        <input type="number" id="energyAmount" placeholder="Enter amount"
+                            class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Price per kWh (Wei)</label>
+                        <input type="number" id="energyPrice" placeholder="Enter price"
+                            class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Energy Type</label>
+                        <select id="energyType" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="solar">Solar</option>
+                            <option value="wind">Wind</option>
+                            <option value="hydro">Hydro</option>
+                        </select>
+                    </div>
+                    <button id="createListing"
+                        class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">
+                        Create Listing
+                    </button>
+                </div>
+
+                <!-- Правая колонка - статистика и информация -->
+                <div class="space-y-4">
+                    <h2 class="text-2xl font-semibold mb-4">Your Statistics</h2>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="text-center p-4 bg-white rounded-lg shadow">
+                                <p class="text-gray-600">Total Active Listings</p>
+                                <p id="totalListings" class="text-2xl font-bold text-blue-600">0</p>
+                            </div>
+                            <div class="text-center p-4 bg-white rounded-lg shadow">
+                                <p class="text-gray-600">Total Energy Listed</p>
+                                <p id="totalEnergy" class="text-2xl font-bold text-green-600">0 kWh</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Секция с активными листингами -->
+            <div class="mt-8">
+                <h2 class="text-2xl font-semibold mb-4">Your Active Listings</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white rounded-lg overflow-hidden">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="py-3 px-4 text-left">ID</th>
+                                <th class="py-3 px-4 text-left">Energy Type</th>
+                                <th class="py-3 px-4 text-left">Amount (kWh)</th>
+                                <th class="py-3 px-4 text-left">Price (Wei)</th>
+                                <th class="py-3 px-4 text-left">Status</th>
+                                <th class="py-3 px-4 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="providerListings">
+                            <!-- Листинги будут добавляться сюда динамически -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-8">
+                <h2 class="text-2xl font-semibold mb-4">Real-time Energy Monitoring</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <canvas id="energyOutputChart"></canvas>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-2">Current Output</h3>
+                                <p id="currentOutput" class="text-3xl font-bold text-green-600">0 kWh</p>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Update Current Output</label>
+                                <div class="flex space-x-2">
+                                    <input type="number" id="newEnergyOutput" placeholder="Enter current output (kWh)"
+                                        class="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <button onclick="updateEnergyOutput()"
+                                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                                        Update
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consumer Section -->
+        <div id="consumerSection" class="bg-white p-6 rounded-lg shadow-md" style="display: none;">
+            <h2 class="text-2xl font-semibold mb-4">Available Energy Listings</h2>
+            <div id="listingsContainer" class="space-y-4">
+                <!-- Listings will be added here dynamically -->
+            </div>
+            <div class="mt-8">
+                <h2 class="text-2xl font-semibold mb-4">Purchase History</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white rounded-lg overflow-hidden shadow">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="py-3 px-4 text-left">Date</th>
+                                <th class="py-3 px-4 text-left">Provider</th>
+                                <th class="py-3 px-4 text-left">Energy Type</th>
+                                <th class="py-3 px-4 text-left">Amount (kWh)</th>
+                                <th class="py-3 px-4 text-left">Total Price (Wei)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="purchaseHistory">
+                            <!-- Purchase history will be added here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
