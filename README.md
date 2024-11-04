@@ -63,3 +63,4 @@ To set up the project locally, follow these steps:
    ```bash
    git clone <repository-url>
    cd energy-trading-dapp
+   just "go live", bro
